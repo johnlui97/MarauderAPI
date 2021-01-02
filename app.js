@@ -1,7 +1,17 @@
 const express = require("express");
 const morgan = require("morgan");
+const mysql  = require("mysql");
+
 const app = express();
 const port = process.env.port || 3000;
+
+// Creating MySQL Connection
+var marauder_db = mysql.createConnection({
+    host:"marauder-db.clm4xkmydujh.us-east-2.rds.amazonaws.com",
+    user:"admin",
+    password:"January-1997-October",
+    database:"MarauderDB"
+});
 
 app.use(morgan("short"));
 
@@ -20,7 +30,14 @@ app.use("/matches", matches_routes);
 app.use("/messages", messages_routes);
 
 app.get('/', (req, res) => {
-    console.log("Establishing Connection to Server.");
+    console.log("Trying to establish Connection to databse.");
+    marauder_db.connect((err) => {
+        if(err) {
+            throw err;
+        }
+        console.log("Database Connected.");
+    });
+
     res.send("Welcome to Marauder API.");
 });
 
