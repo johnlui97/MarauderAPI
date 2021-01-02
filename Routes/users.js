@@ -1,3 +1,4 @@
+const { json } = require("express");
 const express = require("express");
 const router = express.Router();
 const mysql  = require("mysql");
@@ -12,12 +13,11 @@ var db = mysql.createConnection({
 
 router.get("/", (req, res) => {
   console.log(`Attempting to get all the users`);
-  db.connect((err) => {
-    if(err) {
-        throw err;
-    }
-    console.log("Database Connected, ready to querry for all users.");
-    res.send("Database Connected, ready to querry for all users.");
+  var get_all_users_querry = "SELECT * FROM users";
+  let db_querry = db.query(get_all_users_querry, (err, results) => {
+    if(err) throw err;
+    console.log(results);
+    res.send(json(results));
   });
 });
 
