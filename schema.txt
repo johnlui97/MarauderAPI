@@ -1,0 +1,74 @@
+//// -- LEVEL 1
+//// -- Tables and References
+
+// Creating tables
+Table users {
+  id int [pk, increment]
+  first_name varchar
+  last_name varchar
+  email varchar
+  age int
+  gender int
+  password varchar
+  image_link varchar
+}
+
+Table venues {
+  id int [pk, increment]
+  name varchar
+  address varchar
+  latitude float8
+  longitude float8
+  tag varchar
+  media_link varchar
+ }
+
+Table outings {
+  id int [pk, increment]
+  group_id varchar // Cannot be null
+  match_id varchar // Can be null
+  venue_id varchar // Cannot be null
+  time float8
+}
+
+Table matches {
+  id int [pk, increment]
+  group1_id varchar
+  group2_id varchar
+}
+
+Table group {
+  id int [pk, increment]
+  group_id varchar
+  user_id varchar
+}
+
+Table messages {
+  id int [pk, increment]
+  group_id varchar // Can be null
+  from_id varchar
+  to_id varchar
+  content varchar
+  time float8
+  sent int
+}
+
+
+
+Ref: "outings"."group_id" < "group"."group_id"
+
+Ref: "group"."user_id" < "users"."id"
+
+Ref: "outings"."match_id" < "matches"."id"
+
+Ref: "matches"."group1_id" < "group"."group_id"
+
+Ref: "matches"."group2_id" < "group"."group_id"
+
+Ref: "outings"."venue_id" < "venues"."id"
+
+Ref: "messages"."group_id" < "group"."group_id"
+
+Ref: "messages"."from_id" < "users"."id"
+
+Ref: "messages"."to_id" < "users"."id"
