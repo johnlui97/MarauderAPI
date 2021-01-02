@@ -16,7 +16,7 @@ router.get("/", (req, res) => {
     if(err) {
         throw err;
     }
-    console.log("Database Connected.");
+    console.log("Database Connected, ready to querry for all users.");
   });
   res.send("Acquired all users in database.");
 });
