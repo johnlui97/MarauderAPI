@@ -1,15 +1,17 @@
 const express = require("express");
 const morgan = require("morgan");
 const mysql  = require("mysql");
+const dotenv = require('dotenv');
 
 const app = express();
 const port = process.env.port || 3000;
+dotenv.config();
 
 // Creating MySQL Connection
 var marauder_db = mysql.createConnection({
-    host:"marauder-db.clm4xkmydujh.us-east-2.rds.amazonaws.com",
-    user:"admin",
-    password:"January-1997-October",
+    host:process.env.DB_HOST,
+    user:process.env.DB_USER,
+    password:process.env.DB_PASSWORD,
     database:"MarauderDB"
 });
 
