@@ -21,35 +21,25 @@ router.get("/", (req, res) => {
 router.post("/register", (req, res) => {
   const uniqueId = uuidv4();
   const user = {
-    id: uniqueId,
-    first_name: 'John',
-    last_name: 'Doe',
-    email: 'doejoh@mcmaster.ca',
-    age: 23,
-    gender: 'MALE',
-    password: '12345abcde',
-    image_link: 'World Hello!'
+    user_id: uniqueId,
+    first_name: req.body.first_name,
+    last_name: req.body.last_name,
+    email: req.body.email,
+    age: req.body.age,
+    gender: req.body.gender,
+    password: req.body.password,
+    image_link: req.body.image_link
   };
-  
-  console.log(user.id);
-  console.log(user.first_name);
-  console.log(user.last_name);
-  console.log(user.email);
-  console.log(user.gender);
-  console.log(user.password);
-  console.log(user.image_link);
-  console.log(user.age);
 
-  var inser_user_querry = `INSERT INTO users SET ?`;
+  var insert_user_querry = `INSERT INTO users SET ?`;
 
-  db.query(inser_user_querry, user, (err, rows) => {
+  db.query(insert_user_querry, user, (err, result) => {
     if (err) {
       console.log("Failed to register new user into Database, error: ", err);
       return res.sendStatus(500);
     }
     res.send("Successfully registered new User into Marauder Backend.");
   });
-  return res.send("Debugging user post route.")
 });
 
 module.exports = router;
