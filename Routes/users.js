@@ -30,15 +30,23 @@ router.post("/register", (req, res) => {
     password: '12345abcde',
     image_link: 'World Hello!'
   };
-  var inser_user_querry = `INSERT INTO users SET ?`;
+  console.log(user.id);
+  console.log(user.first_name);
+  console.log(user.last_name);
+  console.log(user.email);
+  console.log(user.gender);
+  console.log(user.password);
+  console.log(user.image_link);
+  // var inser_user_querry = `INSERT INTO users SET ?`;
 
-  db.query(inser_user_querry, user, (err, rows) => {
-    if (err) {
-      console.log("Failed to register new user into Database, error: ", err);
-      return res.sendStatus(500);
-    }
-    res.send("Successfully registered new User into Marauder Backend.");
-  });
+  // db.query(inser_user_querry, user, (err, rows) => {
+  //   if (err) {
+  //     console.log("Failed to register new user into Database, error: ", err);
+  //     return res.sendStatus(500);
+  //   }
+  //   res.send("Successfully registered new User into Marauder Backend.");
+  // });
+  return res.send("Debugging user post route.")
 });
 
 module.exports = router;
