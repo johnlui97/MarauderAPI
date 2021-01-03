@@ -1,11 +1,9 @@
 const express = require("express");
 const morgan = require("morgan");
 const mysql  = require("mysql");
-const dotenv = require('dotenv');
 
 const app = express();
 const port = process.env.port || 3000;
-dotenv.config();
 app.use(morgan("short"));
 
 // Creating MySQL Connection
@@ -32,9 +30,6 @@ app.use("/messages", messages_routes);
 
 app.get('/', (req, res) => {
     console.log("Trying to establish Connection to databse.");
-    console.log("MarauderAPI_app.js - Database Host is: ", marauder_db.host);
-    console.log("MarauderAPI_app.js - Database user is: ", marauder_db.user);
-    console.log("MarauderAPI_app.js - Database databse is: ", marauder_db.database);
     marauder_db.connect((err) => {
         if(err) {
             throw err;
