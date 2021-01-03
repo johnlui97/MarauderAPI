@@ -34,6 +34,7 @@ app.use("/messages", messages_routes);
 app.get('/', (req, res) => {
     console.log("Trying to establish Connection to databse.");
     marauder_db.connect((err) => {
+        console.log("MarauderAPI_app.js - Database Host is: ", marauder_db.host);
         if(err) {
             throw err;
         }
