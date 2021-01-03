@@ -4,7 +4,7 @@ const router = express.Router();
 const mysql  = require("mysql");
 const db = require("../connection");
 const { v4: uuidv4 } = require("uuid");
-const bcrypt = require("bcrypt")
+const bcrypt = require("bcrypt");
 
 router.get("/", (req, res) => {
   console.log(`Attempting to get all the users`);
@@ -39,10 +39,11 @@ router.post("/register", (req, res) => {
 
   db.query(insert_user_querry, user, (err, result) => {
     if (err) {
-      console.log("Failed to register new user into Database, error: ", err);
+      console.log("MarauderAPI - /login POST failed to register new user, error: ", err);
       return res.sendStatus(500);
     }
-    res.send("Successfully registered new User into Marauder Backend.");
+    console.log("MarauderAPI - /login POST registed new user: ", user.user_id);
+    res.sendStatus(200);
   });
 });
 
@@ -60,11 +61,11 @@ router.post("/login", (req, res) => {
     }
     queried_password = rows[0].password;
     if(bcrypt.compareSync(req.body.password, queried_password)) {
-      console.log(true);
-      return res.send("Successfully Validated!");
+      console.log("MarauderAPI - /login POST Request Validation Returns: ", true);
+      return res.sendStatus(200);
     } else {
-      console.log(false);
-      return res.send("Unsucessful Validation.");
+      console.log("MarauderAPI - /login POST Request Validation Returns: ", false);
+      return res.sendStatus(403);
     }    
   });
 });

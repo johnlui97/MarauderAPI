@@ -39,7 +39,6 @@ app.get('/', (req, res) => {
         }
         console.log("Database Connected.");
     });
-
     res.send("Welcome to Marauder API.");
 });
 
