@@ -5,6 +5,7 @@ const mysql  = require("mysql");
 const db = require("../connection");
 const { v4: uuidv4 } = require("uuid");
 const bcrypt = require("bcrypt");
+const jwt = require('jsonwebtoken');
 
 router.get("/", (req, res) => {
   console.log(`Attempting to get all the users`);
@@ -68,6 +69,30 @@ router.post("/login", (req, res) => {
       return res.sendStatus(403);
     }    
   });
+});
+
+router.post("/test_generate_web_token", (req, res) => {
+  const user = {
+    "user_id":req.body.user_id
+  }
+  const secret = '359e36710b19042eb11b4f6e7cfb69ab72e75d1e12ff7eeb0e04ab7db84fa64cbf88602873eff698645c63ea1d1e847ab44ead664d3dfe62419a838e42a19ff3';
+  var token = jwt.sign(user, secret);
+  return res.json({"accessToken":token});
+});
+
+router.post("/validate_web_token", (req, res) => {
+  const incoming_token = {
+    "token":req.body.token
+  }
+  jwt.verify(incoming_token, '359e36710b19042eb11b4f6e7cfb69ab72e75d1e12ff7eeb0e04ab7db84fa64cbf88602873eff698645c63ea1d1e847ab44ead664d3dfe62419a838e42a19ff3', (err, user) => {
+    if (err) {
+      console.log(err);
+      return res.sendStatus(403);
+    }
+      console.log("Successfully Validated Token.");
+    return res.sendStatus(200);
+  });
+
 });
 
 module.exports = router;
