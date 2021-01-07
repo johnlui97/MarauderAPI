@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require("uuid");
 const mysql  = require("mysql");
 const db = require("../connection");
 const { json } = require("body-parser");
-// import { compareAsc, format } from 'date-fns';
+
 
 router.get("/", (req, res) => {
     console.log(`Attempting to get all Groups in Backend.`);
