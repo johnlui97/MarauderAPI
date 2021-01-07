@@ -35,32 +35,20 @@ router.post("/", (req, res) => {
     if(group_id) {
       // Group Message Multiple Targets Involved.
       console.log("Received a Group Message, multiple targets needed.");
-
       find_target_query = `SELECT user_id FROM MarauderDB.groups WHERE group_id = '${message.group_id}'`;
-
       db.query(find_target_query, (err, result) => {
         if(err) {
           console.log("Unable to find group targets, err: ", err);
           return res.sendStatus(500);
         }
-        console.log("Found targets: ", result);
-        
-
+        console.log("Send Group Message Via OneSignal or Twilio.");
         return res.send(result);
       });
     } else {
       // Direct Message One Target Needed. No Need to parse for all targets.
+      console.log("Send Direct Message Via One Signal or Twilio.")
       return res.send("Direct Message Received Single Target Needed.");
     }
-
-    // db.query(message_insertion_statement, message, (err, result) => {
-    //   if (err) {
-    //       console.log("MarauderAPI - /messages POST failed to register new message, error: ", err);
-    //       return res.sendStatus(500);
-    //   }
-    //   console.log("MarauderAPI - /messages POST Successfully to register new message");
-    // });
-    // return res.sendStatus(200);
 });
 
 module.exports = router;
