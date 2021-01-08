@@ -5,8 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "bcrypt": "npm install bcrypt",
-    "start": "npm run bcrypt && node app.js"
+    "start": "node app.js"
   },
   "author": "John Lui",
   "license": "ISC",
