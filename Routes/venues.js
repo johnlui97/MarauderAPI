@@ -18,10 +18,28 @@ router.get("/", (req, res) => {
 
     db.query(get_all_venues, (err, rows) => {
       if (err) {
-        console.log("MarauderAPI - /login POST failed to register new user, error: ", err);
+        console.log("MarauderAPI - /venues GET failed to retreive all venues, error: ", err);
         return res.sendStatus(500);
       }
       res.send(rows);
+    });
+});
+
+router.get("/venue_search", (req, res) => {
+    console.log("Searching specific venues within our network.");
+    const venue_search_string = req.query.venue_search_string;
+
+    const venue_search_query = `SELECT * FROM MarauderDB.venues
+                                WHERE name LIKE '${venue_search_string}%'
+                                LIMIT 10;`;
+
+    db.query(venue_search_query, (err, result) => {
+        if(err) {
+          console.log("MarauderAPI - /login POST failed to register new user, error: ", err);
+          return res.sendStatus(500);
+        }
+        console.log(result);
+        return res.send(result);
     });
 });
 

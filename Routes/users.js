@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const mysql  = require("mysql");
 const db = require("../connection");
-const { v4: uuidv4 } = require("uuid");
+const { v4: uuidv4, validate } = require("uuid");
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 
@@ -20,6 +20,23 @@ router.get("/", (req, res) => {
   });
 });
 
+router.post("/validate_email", (req, res) => {
+    console.log("Validating for unique email address for new user.");
+    const email = req.body.email;
+    var validate_email_query = `SELECT * FROM MarauderDB.users WHERE email = '${email}';`;
+    db.query(validate_email_query, (err, result) => {
+        if(err){
+          console.log("MarauderAPI - /validate_email has encountered an error while validating email, err: ", err);
+          return res.sendStatus(500);
+        }
+        if(result[0] == null) {
+          return res.sendStatus(200);
+        } else {
+          return res.sendStatus(409);
+        }
+    });
+});
+
 router.post("/register", (req, res) => {
   const uniqueId = uuidv4();
   const salt = bcrypt.genSaltSync(10);
@@ -28,11 +45,11 @@ router.post("/register", (req, res) => {
   const user = {
     user_id: uniqueId,
     first_name: req.body.first_name,
-    last_name: req.body.last_name,
     email: req.body.email,
     age: req.body.age,
     gender: req.body.gender,
     password: hashed_password,
+    range:req.body.range,
     image_link: req.body.image_link
   };
 
@@ -59,6 +76,10 @@ router.post("/login", (req, res) => {
   db.query(getUserByEmailQuerry, (err, rows) => {
     if(err) {
       return res.send(err);
+    }
+    if(rows === undefined || rows.length == 0) {
+      console.log("MarauderAPI - /login POST Request Failed to find user with specified email, prompt signup instead.");
+      return res.sendStatus(422);
     }
     queried_password = rows[0].password;
     if(bcrypt.compareSync(req.body.password, queried_password)) {
