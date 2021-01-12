@@ -38,7 +38,6 @@ router.get("/venue_search", (req, res) => {
           console.log("MarauderAPI - /login POST failed to register new user, error: ", err);
           return res.sendStatus(500);
         }
-        console.log(result);
         return res.send(result);
     });
 });
