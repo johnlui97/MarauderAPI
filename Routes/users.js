@@ -20,6 +20,23 @@ router.get("/", (req, res) => {
   });
 });
 
+router.get("/search", (req, res) => {
+    console.log("Conducting user search within database.");
+
+    const user = req.query.name;
+    const user_query = `SELECT users.user_id, users.first_name, users.email, users.image_link, users.age FROM MarauderDB.users
+                        WHERE first_name LIKE '${user}%'
+                        LIMIT 10;`;
+
+    db.query(user_query, (err, result) => {
+        if(err) {
+          console.log("MarauderAPI - /validate_email has encountered an error while validating email, err: ", err);
+          return res.sendStatus(500);
+        }
+        return res.send(result);
+    });
+});
+
 router.post("/validate_email", (req, res) => {
     console.log("Validating for unique email address for new user.");
     const email = req.body.email;
