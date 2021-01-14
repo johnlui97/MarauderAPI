@@ -37,10 +37,28 @@ router.get("/search", (req, res) => {
     });
 });
 
-router.post("/validate_email", (req, res) => {
+router.get("/validate_email", (req, res) => {
     console.log("Validating for unique email address for new user.");
-    const email = req.body.email;
+    const email = req.query.email;
+    console.log(email);
     var validate_email_query = `SELECT * FROM MarauderDB.users WHERE email = '${email}';`;
+    db.query(validate_email_query, (err, result) => {
+        if(err){
+          console.log("MarauderAPI - /validate_email has encountered an error while validating email, err: ", err);
+          return res.sendStatus(500);
+        }
+        if(result[0] == null) {
+          return res.sendStatus(200);
+        } else {
+          return res.sendStatus(409);
+        }
+    });
+});
+
+router.get("/validate_username", (req, res) => {
+    console.log("Validating for unique username for new user.");
+    const username = req.query.username;
+    var validate_email_query = `SELECT * FROM MarauderDB.users WHERE username = '${username}';`;
     db.query(validate_email_query, (err, result) => {
         if(err){
           console.log("MarauderAPI - /validate_email has encountered an error while validating email, err: ", err);
@@ -61,7 +79,8 @@ router.post("/register", (req, res) => {
 
   const user = {
     user_id: uniqueId,
-    first_name: req.body.first_name,
+    full_name: req.body.full_name,
+    username: req.body.username,
     email: req.body.email,
     age: req.body.age,
     gender: req.body.gender,
