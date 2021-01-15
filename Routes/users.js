@@ -24,8 +24,8 @@ router.get("/search", (req, res) => {
     console.log("Conducting user search within database.");
 
     const user = req.query.name;
-    const user_query = `SELECT users.user_id, users.first_name, users.email, users.image_link, users.age FROM MarauderDB.users
-                        WHERE first_name LIKE '${user}%'
+    const user_query = `SELECT users.user_id, users.full_name, users.username, users.email, users.image_link, users.age FROM MarauderDB.users
+                        WHERE full_name LIKE '${user}%'
                         LIMIT 10;`;
 
     db.query(user_query, (err, result) => {
