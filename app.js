@@ -1,6 +1,7 @@
 const express = require("express");
 const morgan = require("morgan");
 const mysql  = require("mysql");
+require("dotenv").config();
 const bodyParser = require("body-parser");
 
 const app = express();
@@ -11,10 +12,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Creating MySQL Connection
 var marauder_db = mysql.createConnection({
-    host:'marauder-db.clm4xkmydujh.us-east-2.rds.amazonaws.com',
-    user:'admin',
-    password:'January-1997-October',
-    database:"MarauderDB"
+    host:process.env.DB_HOST,
+    user:process.env.DB_USER,
+    password:process.env.DB_PASSWORD,
+    database:process.env.DATABASE
 });
 
 const user_routes = require("./Routes/users");

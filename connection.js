@@ -5,10 +5,10 @@ dotenv.config();
 
 // Creating MySQL Connection
 var connection = mysql.createConnection({
-    host:'marauder-db.clm4xkmydujh.us-east-2.rds.amazonaws.com',
-    user:'admin',
-    password:'January-1997-October',
-    database:"MarauderDB"
+    host:process.env.DB_HOST,
+    user:process.env.DB_USER,
+    password:process.env.DB_PASSWORD,
+    database:process.env.DATABASE
 });
 
 module.exports = connection;
