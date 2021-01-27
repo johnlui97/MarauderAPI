@@ -4,8 +4,7 @@
   "description": "Marauder web API to handle application requests and to facilitate/execute on frontend user demands.",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "John Lui",
   "license": "ISC",
