@@ -60,19 +60,25 @@ router.get("/validate_username", (req, res) => {
 
 router.post("/register", (req, res) => {
   const uniqueId = uuidv4();
-  const salt = bcrypt.genSaltSync(10);
-  const hashed_password = bcrypt.hashSync(req.body.password, salt);
 
   const user = {
     user_id: uniqueId,
-    full_name: req.body.full_name,
+    phone_number: req.body.number,
     username: req.body.username,
-    email: req.body.email,
     age: req.body.age,
     gender: req.body.gender,
-    password: hashed_password,
-    range:req.body.range,
-    image_link: req.body.image_link
+    range: req.body.range,
+    lower_match_age: req.body.lower_match_age,
+    upper_match_age: req.body.upper_match_age,
+    match_male: req.body.match_male,
+    match_female: req.body.match_female,
+    match_nonbinary: req.body.match_nonbinary,
+    profile_image_1: "req.body.profile_image_1",
+    profile_image_2: "req.body.profile_image_2",
+    profile_image_3: "req.body.profile_image_3",
+    profile_image_4: "req.body.profile_image_4",
+    profile_caption: req.body.profile_caption,
+    is_account_paused: req.body.is_account_paused
   };
 
   var insert_user_querry = `INSERT INTO users SET ?`;
@@ -82,8 +88,18 @@ router.post("/register", (req, res) => {
       console.log("MarauderAPI - /login POST failed to register new user, error: ", err);
       return res.sendStatus(500);
     }
+
+    const secret = process.env.SECRET;
+    var token = jwt.sign(uniqueId, secret, {
+      expiresIn: '7d'
+    });
+
     console.log("MarauderAPI - /login POST registed new user: ", user.user_id);
-    res.sendStatus(200);
+    return res.json(
+      {
+        "user_id":uniqueId,
+        "token":token
+      });
   });
 });
 
@@ -115,27 +131,35 @@ router.post("/login", (req, res) => {
 });
 
 router.post("/test_generate_web_token", (req, res) => {
-  const user = {
-    "user_id":req.body.user_id
-  }
+  const user = {"user_id":req.body.user_id}
   const secret = process.env.SECRET;
-  var token = jwt.sign(user, secret);
-  return res.json({"accessToken":token});
-});
-
-router.post("/validate_web_token", (req, res) => {
-  const incoming_token = {
-    "token":req.body.token
-  }
-  jwt.verify(incoming_token, secret, (err, user) => {
-    if (err) {
-      console.log(err);
-      return res.sendStatus(403);
-    }
-      console.log("Successfully Validated Token.");
-    return res.sendStatus(200);
+  var token = jwt.sign(user, secret, {
+    expiresIn: '30s'
   });
-
+  return res.json({"access_token":token});
 });
+
+router.post("/validate_web_token", authenticateToken, (req, res) => {
+  jwt.verify(req.token, process.env.SECRET, (err, authData) => {
+    if(err) {
+      return res.sendStatus(403);
+    } else {
+      console.log(authData);
+      return res.sendStatus(200);
+    }
+  });
+});
+
+function authenticateToken(req, res, next) {
+    const bearerHeader = req.headers['authorization'];
+    if(typeof bearerHeader !== 'undefined') {
+      const bearer = bearerHeader.split(' ');
+      const token  = bearer[1];
+      req.token = token;
+      next();
+    } else {
+      res.sendStatus(403);
+    }
+}
 
 module.exports = router;
