@@ -7,27 +7,12 @@ const { v4: uuidv4, validate } = require("uuid");
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 
-router.get("/", (req, res) => {
-  console.log(`Attempting to get all the users`);
-  var get_all_users_querry = `SELECT * FROM users`;
-  db.query(get_all_users_querry, (err, rows) => {
-    if (err) {
-      console.log(`Failed to query for users`, err);
-      return res.sendStatus(404);
-    }
-    console.log(`Completed fetching for the user`);
-    return res.json(rows);
-  });
-});
-
 router.get("/search", (req, res) => {
     console.log("Conducting user search within database.");
-
     const user = req.query.name;
-    const user_query = `SELECT users.user_id, users.full_name, users.username, users.email, users.image_link, users.age FROM MarauderDB.users
+    const user_query = `SELECT users.user_id, users.full_name, users.username, users.image_link, users.age FROM MarauderDB.users
                         WHERE full_name LIKE '${user}%'
                         LIMIT 10;`;
-
     db.query(user_query, (err, result) => {
         if(err) {
           console.log("MarauderAPI - /validate_email has encountered an error while validating email, err: ", err);
@@ -37,20 +22,21 @@ router.get("/search", (req, res) => {
     });
 });
 
-router.get("/validate_email", (req, res) => {
-    console.log("Validating for unique email address for new user.");
-    const email = req.query.email;
-    console.log(email);
-    var validate_email_query = `SELECT * FROM MarauderDB.users WHERE email = '${email}';`;
-    db.query(validate_email_query, (err, result) => {
-        if(err){
-          console.log("MarauderAPI - /validate_email has encountered an error while validating email, err: ", err);
+router.get("/validate_number", (req, res) => {
+    console.log("Validating for unique phone number within database.");
+    const incoming_number = req.query.phone_number;
+    const validation_query = `SELECT * FROM MarauderDB.users WHERE phone_number = '${incoming_number}'`;
+    db.query(validation_query, (err, result) => {
+        if (err) {
+          console.log("MarauderAPI - /validate_number has encountered an error while validating number, err: ", err);
           return res.sendStatus(500);
         }
         if(result[0] == null) {
-          return res.sendStatus(200);
+            console.log("MarauderAPI - /validate_number has encountered no known number of input value.");
+            return res.sendStatus(200);
         } else {
-          return res.sendStatus(409);
+            console.log("MarauderAPI - /validate_number has encountered an existing entry of input value.");
+            return res.sendStatus(409);
         }
     });
 });
@@ -132,7 +118,7 @@ router.post("/test_generate_web_token", (req, res) => {
   const user = {
     "user_id":req.body.user_id
   }
-  const secret = '359e36710b19042eb11b4f6e7cfb69ab72e75d1e12ff7eeb0e04ab7db84fa64cbf88602873eff698645c63ea1d1e847ab44ead664d3dfe62419a838e42a19ff3';
+  const secret = process.env.SECRET;
   var token = jwt.sign(user, secret);
   return res.json({"accessToken":token});
 });
@@ -141,7 +127,7 @@ router.post("/validate_web_token", (req, res) => {
   const incoming_token = {
     "token":req.body.token
   }
-  jwt.verify(incoming_token, '359e36710b19042eb11b4f6e7cfb69ab72e75d1e12ff7eeb0e04ab7db84fa64cbf88602873eff698645c63ea1d1e847ab44ead664d3dfe62419a838e42a19ff3', (err, user) => {
+  jwt.verify(incoming_token, secret, (err, user) => {
     if (err) {
       console.log(err);
       return res.sendStatus(403);
