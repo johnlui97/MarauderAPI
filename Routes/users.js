@@ -5,7 +5,8 @@ const mysql  = require("mysql");
 const db = require("../connection");
 const { v4: uuidv4, validate } = require("uuid");
 const bcrypt = require("bcrypt");
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
+const aws = require("aws-sdk");
 
 router.get("/search", (req, res) => {
     console.log("Conducting user search within database.");
@@ -128,6 +129,19 @@ router.post("/login", (req, res) => {
       return res.sendStatus(403);
     }    
   });
+});
+
+router.post("/user_image", (req, res) => {
+  console.log("Posting User images, Sample Console Message");
+  aws.config.getCredentials(function(err) {
+    if (err) console.log(err.stack);
+    // credentials not loaded
+    else {
+      console.log("Access key:", aws.config.credentials.accessKeyId);
+    }
+  });
+
+  return res.sendStatus(200);
 });
 
 router.post("/test_generate_web_token", (req, res) => {
