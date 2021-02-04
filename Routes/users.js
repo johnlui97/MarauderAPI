@@ -6,6 +6,7 @@ const db = require("../connection");
 const { v4: uuidv4, validate } = require("uuid");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const multer = require("multer");
 const aws = require("aws-sdk");
 
 router.get("/search", (req, res) => {
@@ -133,14 +134,6 @@ router.post("/login", (req, res) => {
 
 router.post("/user_image", (req, res) => {
   console.log("Posting User images, Sample Console Message");
-  aws.config.getCredentials(function(err) {
-    if (err) console.log(err.stack);
-    // credentials not loaded
-    else {
-      console.log("Access key:", aws.config.credentials.accessKeyId);
-    }
-  });
-
   return res.sendStatus(200);
 });
 
