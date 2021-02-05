@@ -8,6 +8,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const AWS = require("aws-sdk");
+const { fil } = require("date-fns/locale");
 
 router.get("/search", (req, res) => {
     console.log("Conducting user search within database.");
@@ -132,30 +133,6 @@ router.post("/login", (req, res) => {
   });
 });
 
-// router.get("/image_upload_url", (req, res) => {
-//   console.log("Attempting to get a signed url to upload user images to aws.");
-
-//   const id = process.env.AWS_ACCESS_ID;
-//   const secret = process.env.AWS_ACCESS_SECRET_KEY;
-//   const bucket = process.env.BUCKET;
-  
-//   var credentials = {
-//       accessKeyId: id,
-//       secretAccessKey : secret
-//   };
-//   AWS.config.update({credentials: credentials, region: 'eu-west-2'});
-//   var s3 = new AWS.S3();
-
-//   var presignedGETURL = s3.getSignedUrl('getObject', {
-//       Bucket: bucket,
-//       Key: 'korean2.jpg', //filename
-//       Expires: 60 //time to expire in seconds
-//   });
-//   console.log(presignedGETURL);
-//   return res.json({"url":presignedGETURL});
-
-// });
-
 const multerStorage = multer.memoryStorage({
   destination: function(req, file, callback) {
     callback(null, '');
@@ -163,6 +140,7 @@ const multerStorage = multer.memoryStorage({
 });
 
 const upload = multer({storage: multerStorage}).single('image');
+const uploads = multer({storage: multerStorage}).array('images', 4);
 
 const s3 = new AWS.S3({
   accessKeyId:process.env.AWS_ACCESS_ID,
@@ -170,25 +148,44 @@ const s3 = new AWS.S3({
 });
 
 router.post("/image_upload", upload, (req, res) => {
-
-  console.log(req.file);
   const random_file_name = uuidv4();
-
   let myFile = req.file.originalname.split('.');
   const fileType = myFile[myFile.length-1];
   const params = {
     Bucket: process.env.BUCKET,
     Key: random_file_name + '.' + fileType,
-    Body: req.file.buffer
+    Body: req.file.buffer,
+    ACL: 'public-read'
   };
-  
   s3.upload(params, (err, data) => {
     if(err) {
       return res.sendStatus(500).send(err);
     }
-    return res.sendStatus(200).send(data);
   });
+  return res.json({"url":"https://marauderimages.s3.us-east-2.amazonaws.com/"+random_file_name+'.'+fileType});
+});
 
+router.post("/images_upload", uploads, (req, res) => {
+  const image_array = req.files;
+  const json_return_object = {};
+  for(i = 0; i < image_array.length; i++) {
+    const random_file_name = uuidv4();
+    let file = image_array[i].originalname.split('.');
+    const file_extension = file[file.length-1];
+    json_return_object["image"+i] = "https://marauderimages.s3.us-east-2.amazonaws.com/" + random_file_name + "." + file_extension;
+    const params = {
+      Bucket: process.env.BUCKET,
+      Key: random_file_name + '.' + file_extension,
+      Body: image_array[i].buffer,
+      ACL: 'public-read'
+    };
+    s3.upload(params, (err, data) => {
+      if(err) {
+        return res.sendStatus(500).send(err);
+      }
+    });
+  }  
+  return res.json(json_return_object);
 });
 
 
