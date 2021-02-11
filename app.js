@@ -35,14 +35,14 @@ app.use("/messages", messages_routes);
 app.use("/friends", friends_routes);
 
 app.get('/', (req, res) => {
-    console.log("Trying to establish Connection to databse.");
-    marauder_db.connect((err) => {
-        if(err) {
-            throw err;
-        }
-        console.log("Database Connected.");
-    });
-    res.send("Welcome to Marauder API.");
+    console.log("HomeEndPoint Hit");
+    // marauder_db.connect((err) => {
+    //     if(err) {
+    //         throw err;
+    //     }
+    //     console.log("Database Connected.");
+    // });
+    res.json("Welcome to Marauder API.");
 });
 
 app.listen(port, () => {

@@ -8,7 +8,6 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const AWS = require("aws-sdk");
-const { fil } = require("date-fns/locale");
 
 router.get("/search", (req, res) => {
     console.log("Conducting user search within database.");
@@ -36,7 +35,7 @@ router.get("/validate_number", (req, res) => {
         }
         if(result[0] == null) {
             console.log("MarauderAPI - /validate_number has encountered no known number of input value.");
-            return res.sendStatus(200);
+            return res.json("Phone Number Validated");
         } else {
             console.log("MarauderAPI - /validate_number has encountered an existing entry of input value.");
             return res.sendStatus(409);
@@ -54,7 +53,8 @@ router.get("/validate_username", (req, res) => {
           return res.sendStatus(500);
         }
         if(result[0] == null) {
-          return res.sendStatus(200);
+          console.log("MarauderAPI - /validate_username has encountered no known username of input value.");
+          return res.json("Username validated");
         } else {
           return res.sendStatus(409);
         }
@@ -76,10 +76,10 @@ router.post("/register", (req, res) => {
     match_male: req.body.match_male,
     match_female: req.body.match_female,
     match_nonbinary: req.body.match_nonbinary,
-    profile_image_1: "req.body.profile_image_1",
-    profile_image_2: "req.body.profile_image_2",
-    profile_image_3: "req.body.profile_image_3",
-    profile_image_4: "req.body.profile_image_4",
+    profile_image_1: req.body.profile_image_1,
+    profile_image_2: req.body.profile_image_2,
+    profile_image_3: req.body.profile_image_3,
+    profile_image_4: req.body.profile_image_4,
     profile_caption: req.body.profile_caption,
     is_account_paused: req.body.is_account_paused
   };
@@ -92,16 +92,16 @@ router.post("/register", (req, res) => {
       return res.sendStatus(500);
     }
 
-    const secret = process.env.SECRET;
-    var token = jwt.sign(uniqueId, secret, {
-      expiresIn: '7d'
-    });
+    // const secret = process.env.SECRET;
+    // var token = jwt.sign(uniqueId, secret, {
+    //   expiresIn: '7d'
+    // });
 
     console.log("MarauderAPI - /login POST registed new user: ", user.user_id);
     return res.json(
       {
         "user_id":uniqueId,
-        "token":token
+        "token":"12345"
       });
   });
 });
