@@ -66,7 +66,7 @@ router.post("/register", (req, res) => {
 
   const user = {
     user_id: uniqueId,
-    phone_number: req.body.number,
+    phone_number: req.body.phone_number,
     username: req.body.username,
     age: req.body.age,
     gender: req.body.gender,
@@ -188,6 +188,47 @@ router.post("/images_upload", uploads, (req, res) => {
   return res.json(json_return_object);
 });
 
+router.put("/settings/match_male/:id", (req, res) => {
+  const user_id = req.params.id;
+  const match_male = req.body.match_male;
+  const updateMatchMaleQuery = `UPDATE users SET match_male = ${match_male} WHERE user_id = '${user_id}';`;
+
+  db.query(updateMatchMaleQuery, (err, result) => {
+    if (err) {
+      console.log("MarauderAPI - /login POST failed to register new user, error: ", err);
+      return res.sendStatus(500);
+    }
+    return res.json("Success.")
+  });
+});
+
+router.put("/settings/match_female/:id", (req, res) => {
+  const user_id = req.params.id;
+  const match_female = req.body.match_female;
+  const updateMatchFemaleQuery = `UPDATE users SET match_female = ${match_female} WHERE user_id = '${user_id}';`;
+
+  db.query(updateMatchFemaleQuery, (err, result) => {
+    if (err) {
+      console.log("MarauderAPI - /login POST failed to register new user, error: ", err);
+      return res.sendStatus(500);
+    }
+    return res.json("Success.")
+  });
+});
+
+router.put("/settings/match_nonbinary/:id", (req, res) => {
+  const user_id = req.params.id;
+  const match_nonbinary = req.body.match_nonbinary;
+  const updateMatchNonBinaryQuery = `UPDATE users SET match_nonbinary = ${match_nonbinary} WHERE user_id = '${user_id}';`;
+
+  db.query(updateMatchNonBinaryQuery, (err, result) => {
+    if (err) {
+      console.log("MarauderAPI - /login POST failed to register new user, error: ", err);
+      return res.sendStatus(500);
+    }
+    return res.json("Success.")
+  });
+});
 
 router.post("/test_generate_web_token", (req, res) => {
   const user = {"user_id":req.body.user_id}
