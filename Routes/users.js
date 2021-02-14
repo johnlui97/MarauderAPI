@@ -230,6 +230,20 @@ router.put("/settings/match_nonbinary/:id", (req, res) => {
   });
 });
 
+router.put("/settings/pause_account/:id", (req, res) => {
+  const user_id = req.params.id;
+  const pause_account = req.body.pause_account;
+  const updatePauseAccountQuery = `UPDATE users SET is_account_paused = ${pause_account} WHERE user_id = '${user_id}';`;
+
+  db.query(updatePauseAccountQuery, (err, result) => {
+    if (err) {
+      console.log("MarauderAPI - /login POST failed to register new user, error: ", err);
+      return res.sendStatus(500);
+    }
+    return res.json("Success.")
+  });
+});
+
 router.post("/test_generate_web_token", (req, res) => {
   const user = {"user_id":req.body.user_id}
   const secret = process.env.SECRET;
