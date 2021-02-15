@@ -244,6 +244,20 @@ router.put("/settings/pause_account/:id", (req, res) => {
   });
 });
 
+router.put("/settings/update_venue_range/:id", (req, res) => {
+  const user_id = req.params.id;
+  const venue_range = req.body.venue_range;
+  const updateVenueRangeQuery = `UPDATE users SET MarauderDB.users.range = ${venue_range} WHERE user_id = '${user_id}';`;
+
+  db.query(updateVenueRangeQuery, (err, result) => {
+    if (err) {
+      console.log("MarauderAPI - /login POST failed to register new user, error: ", err);
+      return res.sendStatus(500);
+    }
+    return res.json("Success.")
+  });
+});
+
 router.post("/test_generate_web_token", (req, res) => {
   const user = {"user_id":req.body.user_id}
   const secret = process.env.SECRET;
