@@ -258,6 +258,20 @@ router.put("/settings/update_venue_range/:id", (req, res) => {
   });
 });
 
+router.put("/settings/update_match_age/:id", (req, res) => {
+  const user_id = req.params.id;
+  const lower_match = req.body.lower_match_age;
+  const upper_match = req.body.upper_match_age;
+  const updateAgeMatchQuery = `UPDATE users SET MarauderDB.users.lower_match_age = ${lower_match}, MarauderDB.users.upper_match_age = ${upper_match} WHERE user_id = '${user_id}';`;
+  db.query(updateAgeMatchQuery, (err, result) => {
+    if (err) {
+      console.log("MarauderAPI - /login POST failed to register new user, error: ", err);
+      return res.sendStatus(500);
+    }
+    return res.json("Success.")
+  });
+});
+
 router.post("/test_generate_web_token", (req, res) => {
   const user = {"user_id":req.body.user_id}
   const secret = process.env.SECRET;
