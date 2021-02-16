@@ -27,9 +27,9 @@ const s3 = new AWS.S3({
 // after a user queries for a specific entry in user table
 router.get("/search", (req, res) => {
     console.log("Conducting user search within database.");
-    const user = req.query.name;
-    const user_query = `SELECT users.user_id, users.full_name, users.username, users.image_link, users.age FROM MarauderDB.users
-                        WHERE full_name LIKE '${user}%'
+    const user = req.query.username;
+    const user_query = `SELECT users.user_id, users.username, users.profile_image_1, users.age FROM MarauderDB.users
+                        WHERE username LIKE '${user}%'
                         LIMIT 10;`;
     db.query(user_query, (err, result) => {
         if(err) {
