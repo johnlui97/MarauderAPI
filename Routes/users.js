@@ -9,6 +9,22 @@ const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const AWS = require("aws-sdk");
 
+const multerStorage = multer.memoryStorage({
+  destination: function(req, file, callback) {
+    callback(null, '');
+  }
+});
+
+const upload = multer({storage: multerStorage}).single('image');
+const uploads = multer({storage: multerStorage}).array('images', 4);
+
+const s3 = new AWS.S3({
+  accessKeyId:process.env.AWS_ACCESS_ID,
+  secretAccessKey:process.env.AWS_ACCESS_SECRET_KEY
+});
+
+// /search is a route that returns a user object
+// after a user queries for a specific entry in user table
 router.get("/search", (req, res) => {
     console.log("Conducting user search within database.");
     const user = req.query.name;
@@ -24,6 +40,8 @@ router.get("/search", (req, res) => {
     });
 });
 
+// /validate_number is a route that validates for unique phone
+// numbers when a new user is onboarding
 router.get("/validate_number", (req, res) => {
     console.log("Validating for unique phone number within database.");
     const incoming_number = req.query.phone_number;
@@ -43,6 +61,8 @@ router.get("/validate_number", (req, res) => {
     });
 });
 
+// /validate_username is a route that validates for a unique 
+// username when a new user is onboarding
 router.get("/validate_username", (req, res) => {
     console.log("Validating for unique username for new user.");
     const username = req.query.username;
@@ -61,6 +81,8 @@ router.get("/validate_username", (req, res) => {
     });
 });
 
+// /register is a route that inputs a new user into the database
+// when a new user is being onboarded
 router.post("/register", (req, res) => {
   const uniqueId = uuidv4();
 
@@ -106,6 +128,8 @@ router.post("/register", (req, res) => {
   });
 });
 
+// /login is a route that allows an existing user to be logged in
+// 
 router.post("/login", (req, res) => {
   const user = {
     email: req.body.email,
@@ -133,20 +157,8 @@ router.post("/login", (req, res) => {
   });
 });
 
-const multerStorage = multer.memoryStorage({
-  destination: function(req, file, callback) {
-    callback(null, '');
-  }
-});
-
-const upload = multer({storage: multerStorage}).single('image');
-const uploads = multer({storage: multerStorage}).array('images', 4);
-
-const s3 = new AWS.S3({
-  accessKeyId:process.env.AWS_ACCESS_ID,
-  secretAccessKey:process.env.AWS_ACCESS_SECRET_KEY
-});
-
+// /images_upload is a route that uploads a single image into the backend
+//
 router.post("/image_upload", upload, (req, res) => {
   const random_file_name = uuidv4();
   let myFile = req.file.originalname.split('.');
@@ -188,27 +200,22 @@ router.post("/images_upload", uploads, (req, res) => {
   return res.json(json_return_object);
 });
 
-router.post("/images_update/:id", upload, (req, res) => {
-  // Target User Id to Replace Image
+router.put("/images_update/profile_image_1/:id", upload, (req, res) => {
   const user_id = req.params.id;
-
-  // New Image File
   const new_file_name = uuidv4();
   let myFile = req.file.originalname.split('.');
   const file_extension = myFile[myFile.length-1];
   const new_url = "https://marauderimages.s3.us-east-2.amazonaws.com/" + new_file_name + "." + file_extension;
-
-  // MySQL Commands to get Existing Information
+  
   const getImageQuery = `SELECT MarauderDB.users.profile_image_1 FROM MarauderDB.users WHERE user_id = '${user_id}';`;
   db.query(getImageQuery, (err, result) => {
     if (err) {
       console.log("MarauderAPI - /login POST failed to register new user, error: ", err);
       return res.sendStatus(500);
     }
-    const old_image_url = result[0].profile_image_1;
-    var url_split = old_image_url.split("/");
+    var url_split = result[0].profile_image_1.split("/");
     const key = url_split[url_split.length-1];
-
+    
     var delete_params = {Bucket: process.env.BUCKET, Key: key};
     s3.deleteObject(delete_params, function(err, data) {
       if (err) {
@@ -225,9 +232,162 @@ router.post("/images_update/:id", upload, (req, res) => {
         return res.sendStatus(500).send(err);
       }
     });
-    return res.json("Success.");
+
+    const updateUserImageQuery = `UPDATE MarauderDB.users SET profile_image_1 = '${new_url}' WHERE user_id = '${user_id}';`;
+    db.query(updateUserImageQuery, (err, result) => {
+      if (err) {
+        console.log("MarauderAPI - /login POST failed to register new user, error: ", err);
+        return res.sendStatus(500);
+      }
+      return res.json("Success.")
+    });
   });
 }); 
+
+router.put("/images_update/profile_image_2/:id", upload, (req, res) => {
+  const user_id = req.params.id;
+  const new_file_name = uuidv4();
+  let myFile = req.file.originalname.split('.');
+  const file_extension = myFile[myFile.length-1];
+  const new_url = "https://marauderimages.s3.us-east-2.amazonaws.com/" + new_file_name + "." + file_extension;
+  
+  const getImageQuery = `SELECT MarauderDB.users.profile_image_2 FROM MarauderDB.users WHERE user_id = '${user_id}';`;
+  db.query(getImageQuery, (err, result) => {
+    if (err) {
+      console.log("MarauderAPI - /login POST failed to register new user, error: ", err);
+      return res.sendStatus(500);
+    }
+    var url_split = result[0].profile_image_2.split("/");
+    const key = url_split[url_split.length-1];
+    
+    var delete_params = {Bucket: process.env.BUCKET, Key: key};
+    s3.deleteObject(delete_params, function(err, data) {
+      if (err) {
+        return res.sendStatus(500).send(err);
+      }
+    });
+
+    var upload_params = { Bucket: process.env.BUCKET,
+                          Key: new_file_name + '.' + file_extension,
+                          Body: req.file.buffer,
+                          ACL: 'public-read' }
+    s3.upload(upload_params, (err, data) => {
+      if(err) {
+        return res.sendStatus(500).send(err);
+      }
+    });
+
+    const updateUserImageQuery = `UPDATE MarauderDB.users SET profile_image_2 = '${new_url}' WHERE user_id = '${user_id}';`;
+    db.query(updateUserImageQuery, (err, result) => {
+      if (err) {
+        console.log("MarauderAPI - /login POST failed to register new user, error: ", err);
+        return res.sendStatus(500);
+      }
+      return res.json("Success.")
+    });
+  });
+}); 
+
+router.put("/images_update/profile_image_3/:id", upload, (req, res) => {
+  const user_id = req.params.id;
+  const new_file_name = uuidv4();
+  let myFile = req.file.originalname.split('.');
+  const file_extension = myFile[myFile.length-1];
+  const new_url = "https://marauderimages.s3.us-east-2.amazonaws.com/" + new_file_name + "." + file_extension;
+  
+  const getImageQuery = `SELECT MarauderDB.users.profile_image_3 FROM MarauderDB.users WHERE user_id = '${user_id}';`;
+  db.query(getImageQuery, (err, result) => {
+    if (err) {
+      console.log("MarauderAPI - /login POST failed to register new user, error: ", err);
+      return res.sendStatus(500);
+    }
+    var url_split = result[0].profile_image_3.split("/");
+    const key = url_split[url_split.length-1];
+    
+    var delete_params = {Bucket: process.env.BUCKET, Key: key};
+    s3.deleteObject(delete_params, function(err, data) {
+      if (err) {
+        return res.sendStatus(500).send(err);
+      }
+    });
+
+    var upload_params = { Bucket: process.env.BUCKET,
+                          Key: new_file_name + '.' + file_extension,
+                          Body: req.file.buffer,
+                          ACL: 'public-read' }
+    s3.upload(upload_params, (err, data) => {
+      if(err) {
+        return res.sendStatus(500).send(err);
+      }
+    });
+
+    const updateUserImageQuery = `UPDATE MarauderDB.users SET profile_image_3 = '${new_url}' WHERE user_id = '${user_id}';`;
+    db.query(updateUserImageQuery, (err, result) => {
+      if (err) {
+        console.log("MarauderAPI - /login POST failed to register new user, error: ", err);
+        return res.sendStatus(500);
+      }
+      return res.json("Success.")
+    });
+  });
+}); 
+
+router.put("/images_update/profile_image_4/:id", upload, (req, res) => {
+  const user_id = req.params.id;
+  const new_file_name = uuidv4();
+  let myFile = req.file.originalname.split('.');
+  const file_extension = myFile[myFile.length-1];
+  const new_url = "https://marauderimages.s3.us-east-2.amazonaws.com/" + new_file_name + "." + file_extension;
+  
+  const getImageQuery = `SELECT MarauderDB.users.profile_image_4 FROM MarauderDB.users WHERE user_id = '${user_id}';`;
+  db.query(getImageQuery, (err, result) => {
+    if (err) {
+      console.log("MarauderAPI - /login POST failed to register new user, error: ", err);
+      return res.sendStatus(500);
+    }
+    var url_split = result[0].profile_image_4.split("/");
+    const key = url_split[url_split.length-1];
+    
+    var delete_params = {Bucket: process.env.BUCKET, Key: key};
+    s3.deleteObject(delete_params, function(err, data) {
+      if (err) {
+        return res.sendStatus(500).send(err);
+      }
+    });
+
+    var upload_params = { Bucket: process.env.BUCKET,
+                          Key: new_file_name + '.' + file_extension,
+                          Body: req.file.buffer,
+                          ACL: 'public-read' }
+    s3.upload(upload_params, (err, data) => {
+      if(err) {
+        return res.sendStatus(500).send(err);
+      }
+    });
+
+    const updateUserImageQuery = `UPDATE MarauderDB.users SET profile_image_4 = '${new_url}' WHERE user_id = '${user_id}';`;
+    db.query(updateUserImageQuery, (err, result) => {
+      if (err) {
+        console.log("MarauderAPI - /login POST failed to register new user, error: ", err);
+        return res.sendStatus(500);
+      }
+      return res.json("Success.")
+    });
+  });
+}); 
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 router.put("/settings/match_male/:id", (req, res) => {
   const user_id = req.params.id;
