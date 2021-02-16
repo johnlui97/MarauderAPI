@@ -27,7 +27,7 @@ router.get("/", (req, res) => {
 router.get("/friend_requests", (req, res) => {
     console.log("Querying for all friend requests associated with user.");
     const user_id = req.query.user_id;
-    const query = `SELECT friends.friend_id, user_id, full_name, username, age, gender, image_link
+    const query = `SELECT friends.friend_id, user_id, username, age, profile_image_1
                    FROM MarauderDB.users
                    JOIN MarauderDB.friends
                    ON users.user_id = friends.from_id
@@ -45,7 +45,7 @@ router.get("/friend_requests", (req, res) => {
 router.get("/my_friends", (req, res) => {
     console.log("getting all my friends.");
     const user_id = req.query.user_id;
-    const friends_list=`SELECT users.user_id, users.full_name, users.username, users.age, users.gender
+    const friends_list=`SELECT users.user_id, users.profile_image_1, users.username, users.age, users.gender
                         FROM MarauderDB.users
                         WHERE users.user_id = (
                             SELECT friends.from_id
@@ -59,7 +59,7 @@ router.get("/my_friends", (req, res) => {
 
     db.query(friends_list, (err, rows) => {
         if(err) {
-            console.log("Error in obtaining user's friends list.");
+            console.log("Error in obtaining user's friends list: ", err);
             return res.sendStatus(500);
         }
         return res.send(rows);
