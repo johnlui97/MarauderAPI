@@ -24,6 +24,26 @@ router.get("/", (req, res) => {
     return res.send("Getting all entries in friends table.")
 });
 
+router.post("/", (req, res) => {
+    console.log("Sending initial friend Request!");
+    const uniqueId = uuidv4();
+    const friendship = {
+        friend_id:uniqueId,
+        from_id:req.body.from_id,
+        to_id:req.body.to_id,
+        isConfirmed:false
+    }
+
+    const insertion_query = `INSERT INTO friends SET ?`;
+    db.query(insertion_query, friendship, (err, rows) => {
+        if(err) {
+            console.log("Error inserting new friend request to friends table. Error: ", err);
+            return res.sendStatus(500);
+        }
+        return res.json("Success.");
+    });
+});
+
 router.get("/friend_requests", (req, res) => {
     console.log("Querying for all friend requests associated with user.");
     const user_id = req.query.user_id;
@@ -66,24 +86,27 @@ router.get("/my_friends", (req, res) => {
     });
 });
 
-router.post("/", (req, res) => {
-    console.log("Sending initial friend Request!");
-    const uniqueId = uuidv4();
-    const friendship = {
-        friend_id:uniqueId,
-        from_id:req.body.from_id,
-        to_id:req.body.to_id,
-        isConfirmed:false
-    }
-
-    const insertion_query = `INSERT INTO friends SET ?`;
-    db.query(insertion_query, friendship, (err, rows) => {
+router.delete("/decline_request", (req, res) => {
+    const from_id = req.body.from_id;
+    const to_id = req.body.to_id;
+    const friendIDQuery =  `SELECT friend_id FROM MarauderDB.friends WHERE MarauderDB.friends.from_id = '${from_id}' AND MarauderDB.friends.to_id = '${to_id}';`;
+    
+    db.query(friendIDQuery, (req, res) => {
         if(err) {
-            console.log("Error inserting new friend request to friends table. Error: ", err);
+            console.log("Error in obtaining user's friends list: ", err);
             return res.sendStatus(500);
         }
-        return res.sendStatus(200);
+        return res.json("Success.");
     });
+
+    // const deleteFriendRequestQuery = `DELETE FROM MarauderDB.friends WHERE friend_id = '${req.body.friend_id}';`
+    // db.query(friends_list, (err, rows) => {
+    //     if(err) {
+    //         console.log("Error in obtaining user's friends list: ", err);
+    //         return res.sendStatus(500);
+    //     }
+    //     return res.json("Success.");
+    // });
 });
 
 router.put("/request_update", (req, res) => {
