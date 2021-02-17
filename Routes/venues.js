@@ -4,6 +4,22 @@ const { v4: uuidv4 } = require("uuid");
 const mysql  = require("mysql");
 const db = require("../connection");
 const { json } = require("body-parser");
+const multer = require("multer");
+const AWS = require("aws-sdk");
+
+const multerStorage = multer.memoryStorage({
+  destination: function(req, file, callback) {
+    callback(null, '');
+  }
+});
+
+const upload = multer({storage: multerStorage}).single('image');
+const uploads = multer({storage: multerStorage}).array('images', 4);
+
+const s3 = new AWS.S3({
+  accessKeyId:process.env.AWS_ACCESS_ID,
+  secretAccessKey:process.env.AWS_ACCESS_SECRET_KEY
+});
 
 router.get("/", (req, res) => {
     console.log(`Attempting to get all the venues within range.`);
@@ -25,7 +41,7 @@ router.get("/", (req, res) => {
     });
 });
 
-router.get("/venue_search", (req, res) => {
+router.get("/venue_search", upload, (req, res) => {
     console.log("Searching specific venues within our network.");
     const venue_search_string = req.query.venue_search_string;
 
@@ -42,28 +58,19 @@ router.get("/venue_search", (req, res) => {
     });
 });
 
-router.post("/generate_venues", (req, res) => {
-  const uniqueId = uuidv4();
-  const venue = {
-    venue_id:uniqueId,
-    name:req.body.name,
-    address:req.body.address,
-    latitude:req.body.latitude,
-    longitude:req.body.longitude, 
-    tag:req.body.tag,
-    media_link:req.body.media_link
-  }
+// router.post("/add_venue", (req, res) => {
+//   const random_file_name = uuidv4();
+//   // let myFile = req.file.originalname.split('.');
+//   // const fileType = myFile[myFile.length-1];
+//   // console.log(req.params.name);
+//   // console.log(req.params.address);
+//   // console.log(req.params.latitude);
+//   // console.log(req.params.longitude);
+//   // console.log(req.params.tag);
 
-  const insert_entry = `INSERT INTO venues SET ?`;
+//   console.log(random_file_name);
 
-  db.query(insert_entry, venue, (err, result) => {
-    if (err) {
-      console.log("MarauderAPI - /login POST failed to register new user, error: ", err);
-      return res.sendStatus(500);
-    }
-    console.log("MarauderAPI - /login POST registed new user: ", venue.venue_id);
-    res.sendStatus(200);
-  });
-});
+//   return res.json("Success");
+// });
 
 module.exports = router;

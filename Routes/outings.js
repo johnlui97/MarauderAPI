@@ -11,6 +11,11 @@ router.get("/", (req, res) => {
     res.send("Acquired all outings in database.");
 });
 
+router.get("/past_outings/:id", (req, res) => {
+    console.log(req.params.id);
+    return res.json("Success.");
+});
+
 router.post("/", (req, res) => {
     console.log("Generating new outings in outings table.");
 
