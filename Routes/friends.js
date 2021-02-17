@@ -86,35 +86,10 @@ router.get("/my_friends", (req, res) => {
     });
 });
 
-router.delete("/decline_request", (req, res) => {
-    const from_id = req.body.from_id;
-    const to_id = req.body.to_id;
-    const friendIDQuery =  `SELECT friend_id FROM MarauderDB.friends WHERE MarauderDB.friends.from_id = '${from_id}' AND MarauderDB.friends.to_id = '${to_id}';`;
-    
-    db.query(friendIDQuery, (req, res) => {
-        if(err) {
-            console.log("Error in obtaining user's friends list: ", err);
-            return res.sendStatus(500);
-        }
-        return res.json("Success.");
-    });
-
-    // const deleteFriendRequestQuery = `DELETE FROM MarauderDB.friends WHERE friend_id = '${req.body.friend_id}';`
-    // db.query(friends_list, (err, rows) => {
-    //     if(err) {
-    //         console.log("Error in obtaining user's friends list: ", err);
-    //         return res.sendStatus(500);
-    //     }
-    //     return res.json("Success.");
-    // });
-});
-
-router.put("/request_update", (req, res) => {
-    console.log("Updating a friend request!");
-    const update = req.body.isConfirmed;
-    const friend_id = req.body.friend_id;
+router.put("/confirm_request/:friend_id", (req, res) => {
+    const friend_id = req.params.friend_id;
     const update_query = `UPDATE MarauderDB.friends
-                          SET isConfirmed = ${update}
+                          SET isConfirmed = 1
                           WHERE friend_id = '${friend_id}';`
 
     db.query(update_query, (err, rows) => {
@@ -122,7 +97,21 @@ router.put("/request_update", (req, res) => {
             console.log("Error in Updating entry in friends table, err: ", err);
             return res.sendStatus(500);
         }
-        return res.sendStatus(200);
+        return res.json("Success.");
+    });
+});
+
+router.delete("/delete_request/:friend_id", (req, res) => {
+    const friend_id = req.params.friend_id;
+    const deleteQuery = `DELETE FROM MarauderDB.friends
+                         WHERE MarauderDB.friends.friend_id = '${friend_id}';`;
+
+    db.query(deleteQuery, (err, rows) => {
+        if(err) {
+            console.log("Error in Updating entry in friends table, err: ", err);
+            return res.sendStatus(500);
+        }
+        return res.json("Success.");
     });
 });
 
