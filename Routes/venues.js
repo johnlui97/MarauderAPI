@@ -58,19 +58,19 @@ router.get("/venue_search", upload, (req, res) => {
     });
 });
 
-// router.post("/add_venue", (req, res) => {
-//   const random_file_name = uuidv4();
-//   // let myFile = req.file.originalname.split('.');
-//   // const fileType = myFile[myFile.length-1];
-//   // console.log(req.params.name);
-//   // console.log(req.params.address);
-//   // console.log(req.params.latitude);
-//   // console.log(req.params.longitude);
-//   // console.log(req.params.tag);
+router.post("/add_venue", (req, res) => {
+  const random_file_name = uuidv4();
+  // let myFile = req.file.originalname.split('.');
+  // const fileType = myFile[myFile.length-1];
+  // console.log(req.params.name);
+  // console.log(req.params.address);
+  // console.log(req.params.latitude);
+  // console.log(req.params.longitude);
+  // console.log(req.params.tag);
 
-//   console.log(random_file_name);
+  console.log(random_file_name);
 
-//   return res.json("Success");
-// });
+  return res.json("Success");
+});
 
 module.exports = router;

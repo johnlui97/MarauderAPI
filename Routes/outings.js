@@ -11,9 +11,18 @@ router.get("/", (req, res) => {
     res.send("Acquired all outings in database.");
 });
 
-router.get("/past_outings/:id", (req, res) => {
-    console.log(req.params.id);
-    return res.json("Success.");
+router.get("/my_outings/:id", (req, res) => {
+    const my_outings_query = `SELECT MarauderDB.groups.user_id, outings.outing_id, outings.group_id, outings.venue_id, venues.venue_image_link FROM MarauderDB.outings
+                              JOIN MarauderDB.groups ON outings.group_id = MarauderDB.groups.group_id
+                              JOIN MarauderDB.venues ON outings.venue_id = venues.venue_id
+                              WHERE MarauderDB.groups.user_id = '${req.params.id}';`
+    db.query(my_outings_query, (err, rows) => {
+      if(err) {
+        console.log("There was an error inserting into outigns table: ", err);
+        return res.sendStatus(500);
+      } 
+      return res.json(rows);
+    });
 });
 
 router.post("/", (req, res) => {
