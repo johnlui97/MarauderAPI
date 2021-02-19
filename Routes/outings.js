@@ -12,7 +12,7 @@ router.get("/", (req, res) => {
 });
 
 router.get("/my_outings/:id", (req, res) => {
-    const my_outings_query = `SELECT MarauderDB.groups.user_id, outings.outing_id, outings.group_id, outings.venue_id, venues.venue_image_link FROM MarauderDB.outings
+    const my_outings_query = `SELECT MarauderDB.groups.user_id, outings.outing_id, outings.group_id, outings.venue_id, venues.venue_image_link, outings.is_request FROM MarauderDB.outings
                               JOIN MarauderDB.groups ON outings.group_id = MarauderDB.groups.group_id
                               JOIN MarauderDB.venues ON outings.venue_id = venues.venue_id
                               WHERE MarauderDB.groups.user_id = '${req.params.id}';`
@@ -23,6 +23,24 @@ router.get("/my_outings/:id", (req, res) => {
       } 
       return res.json(rows);
     });
+});
+
+router.get("/users/:outing_id/:group_id", (req, res) => {
+  // We need outing_id because matches are associated with it
+  // And right now we dont have functionality to do matches.
+    console.log(req.params.outing_id);
+    console.log(req.params.group_id);
+    const outingUsersQuery = `SELECT * FROM MarauderDB.groups
+                              JOIN MarauderDB.users ON MarauderDB.groups.user_id = MarauderDB.users.user_id
+                              WHERE MarauderDB.groups.group_id = '${req.params.group_id}';`;
+
+    db.query(outingUsersQuery, (err, rows) => {
+      if(err) {
+        console.log("There was an error inserting into outigns table: ", err);
+        return res.sendStatus(500);
+      } 
+      return res.json(rows);
+    }); 
 });
 
 router.post("/", (req, res) => {
