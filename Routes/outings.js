@@ -12,15 +12,15 @@ router.get("/", (req, res) => {
 });
 
 router.get("/my_outings/:id", (req, res) => {
-    const my_outings_query = `SELECT MarauderDB.groups.user_id, outings.outing_id, outings.group_id, outings.venue_id, venues.venue_image_link, outings.is_request FROM MarauderDB.outings
-                              JOIN MarauderDB.groups ON outings.group_id = MarauderDB.groups.group_id
+    const my_outings_query = `SELECT outings.outing_id, outings.group_id, outings.match_id, outings.user_id, outings.is_confirmed, venues.venue_id, venues.name, venues.address, venues.venue_image_link FROM MarauderDB.outings
                               JOIN MarauderDB.venues ON outings.venue_id = venues.venue_id
-                              WHERE MarauderDB.groups.user_id = '${req.params.id}';`
+                              WHERE outings.user_id = '${req.params.id}';`
     db.query(my_outings_query, (err, rows) => {
       if(err) {
         console.log("There was an error inserting into outigns table: ", err);
         return res.sendStatus(500);
       } 
+      console.log(rows);
       return res.json(rows);
     });
 });
@@ -76,7 +76,32 @@ router.post("/", (req, res) => {
       }
       console.log("Succesfully entered outing into the table.");
     });
-    return res.sendStatus(200);
   });
+
+router.put("/confirm_outing/:outing_id/:user_id", (req, res) => {
+  const updateOutingConfirmationQuery = `UPDATE outings SET is_confirmed = 1 
+                                        WHERE outings.user_id = '${req.params.user_id}' 
+                                        AND outings.outing_id = '${req.params.outing_id}';`;
+  db.query(updateOutingConfirmationQuery, (err, rows) => {
+    if(err) {
+      console.log("There was an error inserting into outigns table: ", err);
+      return res.sendStatus(500);
+    }
+    return res.json("Success");
+  });
+});
+
+router.delete("/decline_outing/:outing_id/:user_id", (req, res) => {
+  const deleteOutingConfirmationQuery = `DELETE FROM MarauderDB.outings 
+                                         WHERE MarauderDB.outings.outing_id = '${req.params.outing_id}' 
+                                         AND MarauderDB.outings.user_id = '${eq.params.user_id}';`;
+  db.query(deleteOutingConfirmationQuery, (err, rows) => {
+    if(err) {
+      console.log("There was an error inserting into outigns table: ", err);
+      return res.sendStatus(500);
+    }
+    return res.json("Success");
+  });
+});
 
 module.exports = router;
