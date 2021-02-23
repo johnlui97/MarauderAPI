@@ -62,9 +62,9 @@ router.get("/friend_requests", (req, res) => {
     });
 });
 
-router.get("/my_friends", (req, res) => {
+router.get("/my_friends/:id", (req, res) => {
     console.log("getting all my friends.");
-    const user_id = req.query.user_id;
+    const user_id = req.params.id;
     const friends_list=`SELECT users.user_id, users.profile_image_1, users.username, users.age, users.gender
                         FROM MarauderDB.users
                         WHERE users.user_id = (
