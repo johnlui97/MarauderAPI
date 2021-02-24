@@ -44,19 +44,77 @@ router.get("/users/:outing_id/:group_id", (req, res) => {
 });
 
 router.post("/", (req, res) => {
-  console.log("Posting new outing into outing table.");
-  // const uniqueId = uuidv4();
-  const outing = {
-    outing_id: "12345",
-    group_id: req.body.group_id,
-    venue_id: req.body.venue_id,
-    user_id_1: req.body.user_id_1,
-    user_id_2: req.body.user_id_2,
-    user_id_3: req.body.user_id_3,
-    user_id_4: req.body.user_id_4
-  }
-  console.log(outing)
-  return res.send("Success");
+  const users = req.body.users;
+  const userInjectionString = users.map(c => `'${c}'`).join(', ');
+  const group_member_verification_query =  `SELECT MarauderDB.groups.membership_id, MarauderDB.groups.group_id, COUNT(MarauderDB.groups.group_id) as group_id_frequency 
+                                            FROM MarauderDB.groups
+                                            WHERE (MarauderDB.groups.user_id IN (${userInjectionString})) 
+                                            GROUP BY MarauderDB.groups.group_id
+                                            HAVING group_id_frequency = ${users.length};`;
+
+  db.query(group_member_verification_query, (err, rows) => {
+    if(err) {
+      console.log("There was an error inserting into outigns table: ", err);
+      return res.sendStatus(500);
+    }
+    if(rows[0].length != 0) {
+      const group_id = rows[0].group_id;
+      for(i = 0; i < users.length; i++) {
+        const new_outing_id = uuidv4();
+        const outing = {
+          outing_id:new_outing_id,
+          venue_id:req.body.venue_id,
+          group_id:group_id,
+          match_id:null,
+          user_id:users[i],
+          is_confirmed:false
+        }
+        const insert_new_outing_query = `INSERT INTO outings SET ?`;
+        db.query(insert_new_outing_query, outing, (err, rows) => {
+          if(err) {
+            console.log("There was an error inserting into outigns table: ", err);
+            return res.sendStatus(500);
+          }
+        });
+      }
+    } else {
+      const group_id = uuidv4();
+      for(i = 0; i < users.length; i++) {
+        const membership = uuidv4();
+        const group = {
+          membership_id:membership,
+          group_id:group_id,
+          user_id:users[i]
+        }
+        const insert_new_group_query = `INSERT INTO groups SET ?`;
+        db.query(insert_new_group_query, group, (err, rows) => {
+          if(err) {
+            console.log("There was an error inserting into outigns table: ", err);
+            return res.sendStatus(500);
+          }
+        });
+      }
+      for(i = 0; i < users.length; i++) {
+        const new_outing_id = uuidv4();
+        const outing = {
+          outing_id:new_outing_id,
+          venue_id:req.body.venue_id,
+          group_id:group_id,
+          match_id:null,
+          user_id:users[i],
+          is_confirmed:false
+        }
+        const insert_new_outing_query = `INSERT INTO outings SET ?`;
+        db.query(insert_new_outing_query, outing, (err, rows) => {
+          if(err) {
+            console.log("There was an error inserting into outigns table: ", err);
+            return res.sendStatus(500);
+          }
+        });
+      }
+    }
+    return res.sendStatus(200);
+  });                         
 });
 
 router.put("/confirm_outing/:outing_id/:user_id", (req, res) => {
