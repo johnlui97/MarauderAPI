@@ -81,6 +81,23 @@ router.get("/validate_username", (req, res) => {
     });
 });
 
+// /get_user_bio is a route that gets a targetted users bio
+// this is used when a user is being looked up
+router.get("/get_user_bio/:id", (req, res) => {
+    const user_id = req.params.id;
+    const user_images_query =  `SELECT profile_image_1, profile_image_2, profile_image_3, profile_image_4 FROM MarauderDB.users
+                                WHERE MarauderDB.users.user_id = '${user_id}';`;
+    
+    db.query(user_images_query, (err, rows) => {
+      if (err) {
+        console.log("MarauderAPI - /login POST failed to register new user, error: ", err);
+        return res.sendStatus(500);
+      } 
+      console.log(rows);
+      return res.send(rows);
+    });
+});
+
 // /register is a route that inputs a new user into the database
 // when a new user is being onboarded
 router.post("/register", (req, res) => {

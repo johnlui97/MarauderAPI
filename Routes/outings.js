@@ -1,4 +1,5 @@
 const express = require("express");
+const util = require('util');
 const router = express.Router();
 const { v4: uuidv4 } = require("uuid");
 const mysql  = require("mysql");
@@ -51,7 +52,6 @@ router.post("/", (req, res) => {
                                             WHERE (MarauderDB.groups.user_id IN (${userInjectionString})) 
                                             GROUP BY MarauderDB.groups.group_id
                                             HAVING group_id_frequency = ${users.length};`;
-
   db.query(group_member_verification_query, (err, rows) => {
     if(err) {
       console.log("There was an error inserting into outigns table: ", err);
@@ -115,6 +115,25 @@ router.post("/", (req, res) => {
     }
     return res.sendStatus(200);
   });                         
+});
+
+router.post("/outing_with_promises", (req, res) => {
+    const users = req.body.users;
+    const userInjectionString = users.map(c => `'${c}'`).join(', ');
+    const group_existence_query =  `SELECT MarauderDB.groups.membership_id, MarauderDB.groups.group_id, COUNT(MarauderDB.groups.group_id) as group_id_frequency 
+                    FROM MarauderDB.groups
+                    WHERE (MarauderDB.groups.user_id IN (${userInjectionString})) 
+                    GROUP BY MarauderDB.groups.group_id
+                    HAVING group_id_frequency = ${users.length};`;
+    const query = util.promisify(db.query).bind(db);
+    (async () => {
+      try {
+        const rows = await query(group_existence_query);
+        console.log(rows);
+      } finally {
+        query.end();
+      }
+    })()
 });
 
 router.put("/confirm_outing/:outing_id/:user_id", (req, res) => {
