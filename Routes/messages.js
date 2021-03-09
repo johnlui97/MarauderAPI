@@ -51,4 +51,49 @@ router.post("/", (req, res) => {
     }
 });
 
+router.post("/test_message", (req, res) => { 
+
+    console.log("Sendign Test Message Via One Signal API for Push Notifications");
+
+    var message = { 
+      app_id: "7a27761a-7404-49d6-b48c-5eee6141e7ed",
+      contents: {"en": "English Message"},
+      headings: {"title":"Hello World!"},
+      include_player_ids: ["750acdc2-15a4-4160-9bfd-8bb433d2f284"]
+    };
+    sendNotification(message);
+    return res.send("Success");
+    
+});
+
+var sendNotification = function(data) {
+  var headers = {
+    "Content-Type": "application/json; charset=utf-8"
+  };
+  
+  var options = {
+    host: "onesignal.com",
+    port: 443,
+    path: "/api/v1/notifications",
+    method: "POST",
+    headers: headers
+  };
+  
+  var https = require('https');
+  var req = https.request(options, function(res) {  
+    res.on('data', function(data) {
+      console.log("Response:");
+      console.log(JSON.parse(data));
+    });
+  });
+  
+  req.on('error', function(e) {
+    console.log("ERROR:");
+    console.log(e);
+  });
+  
+  req.write(JSON.stringify(data));
+  req.end();
+};
+
 module.exports = router;
