@@ -4,7 +4,6 @@ const router = express.Router();
 const mysql  = require("mysql");
 const db = require("../connection");
 const { v4: uuidv4, validate } = require("uuid");
-const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 
 router.get("/", (req, res) => {

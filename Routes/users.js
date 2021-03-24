@@ -4,7 +4,6 @@ const router = express.Router();
 const mysql  = require("mysql");
 const db = require("../connection");
 const { v4: uuidv4, validate } = require("uuid");
-const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const AWS = require("aws-sdk");
@@ -162,32 +161,32 @@ router.post("/register", (req, res) => {
 
 // /login is a route that allows an existing user to be logged in
 // 
-router.post("/login", (req, res) => {
-  const user = {
-    email: req.body.email,
-    password: req.body.password
-  };
-  const targetted_email = req.body.email;
-  const getUserByEmailQuerry = `SELECT * FROM users WHERE email = '${targetted_email}';`;
+// router.post("/login", (req, res) => {
+//   const user = {
+//     email: req.body.email,
+//     password: req.body.password
+//   };
+//   const targetted_email = req.body.email;
+//   const getUserByEmailQuerry = `SELECT * FROM users WHERE email = '${targetted_email}';`;
 
-  db.query(getUserByEmailQuerry, (err, rows) => {
-    if(err) {
-      return res.send(err);
-    }
-    if(rows === undefined || rows.length == 0) {
-      console.log("MarauderAPI - /login POST Request Failed to find user with specified email, prompt signup instead.");
-      return res.sendStatus(422);
-    }
-    queried_password = rows[0].password;
-    if(bcrypt.compareSync(req.body.password, queried_password)) {
-      console.log("MarauderAPI - /login POST Request Validation Returns: ", true);
-      return res.sendStatus(200);
-    } else {
-      console.log("MarauderAPI - /login POST Request Validation Returns: ", false);
-      return res.sendStatus(403);
-    }    
-  });
-});
+//   db.query(getUserByEmailQuerry, (err, rows) => {
+//     if(err) {
+//       return res.send(err);
+//     }
+//     if(rows === undefined || rows.length == 0) {
+//       console.log("MarauderAPI - /login POST Request Failed to find user with specified email, prompt signup instead.");
+//       return res.sendStatus(422);
+//     }
+//     queried_password = rows[0].password;
+//     if(bcrypt.compareSync(req.body.password, queried_password)) {
+//       console.log("MarauderAPI - /login POST Request Validation Returns: ", true);
+//       return res.sendStatus(200);
+//     } else {
+//       console.log("MarauderAPI - /login POST Request Validation Returns: ", false);
+//       return res.sendStatus(403);
+//     }    
+//   });
+// });
 
 // /images_upload is a route that uploads a single image into the backend
 //
