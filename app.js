@@ -36,12 +36,6 @@ app.use("/friends", friends_routes);
 
 app.get('/', (req, res) => {
     console.log("HomeEndPoint Hit");
-    // marauder_db.connect((err) => {
-    //     if(err) {
-    //         throw err;
-    //     }
-    //     console.log("Database Connected.");
-    // });
     res.json("Welcome to Marauder API.");
 });
 

@@ -23,6 +23,21 @@ const s3 = new AWS.S3({
   secretAccessKey:process.env.AWS_ACCESS_SECRET_KEY
 });
 
+router.get("/search/user_id", (req, res) => {
+    console.log("Retrieving user from database from user id");
+    const user = req.query.user_id;
+    const user_query = `SELECT user_id, username, age, gender, profile_image_1 FROM MarauderDB.users
+                        WHERE user_id = '${user}';`;
+
+    db.query(user_query, (err, result) => {
+        if(err) {
+          console.log("MarauderAPI - /validate_email has encountered an error while validating email, err: ", err);
+          return res.sendStatus(500);
+        } 
+        return res.send(result);
+    });
+});
+
 // /search is a route that returns a user object
 // after a user queries for a specific entry in user table
 router.get("/search", (req, res) => {
